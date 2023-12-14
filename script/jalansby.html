@@ -1,0 +1,108 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.2.0/ol.css" type="text/css">
+    <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
+    <style>
+        #peta {
+            height: 400px;
+            width: 100%;
+            background-color: yellow;
+        }
+        .map-coordinates {
+            margin-top: 10px;
+            background-color: orange;
+            padding: 5px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <h1> PETA PENGGUNAAN LAHAN KECAMATAN MENGANTI DRIYOREJO DAN WRINGINANOM </h1>
+        <h3> WebGIS Series - OpenLayers </h3>
+    </center>
+    <div id="peta" class="peta"></div>
+    <div id="map-coordinates" class="map-coordinates"></div>
+
+    <script>
+	var simbol_titik = new ol.style.Style
+		({
+			image : new ol.style.Icon({src:'../gambar/icon_lokasi.png'})
+		});
+		
+		var file_titik = new ol.source.Vector
+		({
+			url		: '../peta/titik_3.geojson',
+			format	: new ol.format.GeoJSON()
+		});
+		
+		var peta_titik = new ol.layer.Vector
+		({
+			source	: file_titik,
+			style	: simbol_titik
+		});
+	var simbol_admin = new ol.style.Style
+			({
+			stroke	: new ol.style.Stroke({color:'rgb(0,0,0)', width:1}),
+			fill	: new ol.style.Fill({color:'#7FFFD4'})
+			});
+			
+		var file_admin = new ol.source.Vector 
+			({
+				url: '../peta/batas_kecamatan.geojson',
+				format	: new ol.format.GeoJSON()
+			});
+			
+		var peta_admin = new ol.layer.Vector
+			({
+				source :file_admin,
+				style  :simbol_admin
+			});
+		var simbol_jalan = new ol.style.Style
+			({
+			stroke: new ol.style.Stroke({color:'rgb(255,0,0}', width: 2}),
+			});
+			
+		var file_peta = new ol.source.Vector
+			({
+				url: '../peta/jalan_kecamatan.geojson',
+				format : new ol.format.GeoJSON()
+			});
+			
+		var peta_jalan = new ol.layer.Vector
+			({
+				source : file_peta, 
+				style  : simbol_jalan
+			});
+			
+        var myosm = new ol.layer.Tile({source: new ol.source.OSM()});
+
+        var myview = new ol.View({
+            center: ol.proj.fromLonLat([112.62692, -7.32066]),
+            zoom: 12
+        });
+        var mylayer = [myosm, peta_admin, peta_jalan, peta_titik];
+
+        var mymap = new ol.Map({
+            target: 'peta',
+            layers: mylayer,
+            view: myview
+        });
+
+        function updateMouseCoordinates(event) {
+            var coordinate = mymap.getEventCoordinate(event.originalEvent);
+            var lonLat = ol.proj.toLonLat(coordinate);
+            if (!isNaN(lonLat[0]) && !isNaN(lonLat[1])) {
+                document.getElementById('map-coordinates').innerText = 'Lon: ' + lonLat[0].toFixed(5) + ', Lat: ' + lonLat[1].toFixed(5);
+            }
+        }
+
+        mymap.on('pointermove', function(event) {
+            if (event.dragging) {
+                return;
+            }
+            updateMouseCoordinates(event);
+        });
+    </script>
+</body>
+</html>
